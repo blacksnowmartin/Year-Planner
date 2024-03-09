@@ -1,5 +1,28 @@
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const calendarElement = document.getElementById('calendar');
+let savedGoals = JSON.parse(localStorage.getItem('goals')) || [];
+
+function renderGoals() {
+    calendarElement.innerHTML = '';
+    savedGoals.forEach(({ goal, duration }) => {
+        const today = new Date();
+        const currentMonth = today.getMonth();
+        const currentYear = today.getFullYear();
+        
+        for (let i = 0; i < duration; i++) {
+            const monthIndex = (currentMonth + i) % 12;
+            const year = currentYear + Math.floor((currentMonth + i) / 12);
+            const monthElement = document.createElement('div');
+            monthElement.classList.add('month');
+            monthElement.innerHTML = `<h3>${months[monthIndex]} ${year}</h3>`;
+            const goalElement = document.createElement('div');
+            goalElement.classList.add('goal');
+            goalElement.textContent = goal;
+            monthElement.appendChild(goalElement);
+            calendarElement.appendChild(monthElement);
+        }
+    });
+}
 
 function addGoal() {
     const goal = document.getElementById('goal').value;
@@ -10,20 +33,9 @@ function addGoal() {
         return;
     }
 
-    const today = new Date();
-    const currentMonth = today.getMonth();
-    const currentYear = today.getFullYear();
-    
-    for (let i = 0; i < duration; i++) {
-        const monthIndex = (currentMonth + i) % 12;
-        const year = currentYear + Math.floor((currentMonth + i) / 12);
-        const monthElement = document.createElement('div');
-        monthElement.classList.add('month');
-        monthElement.innerHTML = `<h3>${months[monthIndex]} ${year}</h3>`;
-        const goalElement = document.createElement('div');
-        goalElement.classList.add('goal');
-        goalElement.textContent = goal;
-        monthElement.appendChild(goalElement);
-        calendarElement.appendChild(monthElement);
-    }
+    savedGoals.push({ goal, duration });
+    localStorage.setItem('goals', JSON.stringify(savedGoals));
+    renderGoals();
 }
+
+renderGoals();
