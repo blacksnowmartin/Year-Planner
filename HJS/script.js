@@ -35,7 +35,7 @@ function renderGoals() {
             deleteButton.textContent = 'Delete';
             deleteButton.classList.add('delete-button');
             deleteButton.onclick = function() {
-                deleteGoal(goal);
+                deleteGoal(goal, monthName); // Pass monthName to deleteGoal
             };
             goalElement.appendChild(deleteButton);
             
@@ -58,8 +58,14 @@ function addGoal() {
     renderGoals();
 }
 
-function deleteGoal(goalToDelete) {
-    savedGoals = savedGoals.filter(({ goal }) => goal !== goalToDelete);
+function deleteGoal(goalToDelete, monthNameToDelete) {
+    savedGoals = savedGoals.filter(({ goal, duration }) => {
+        // Check if the goal is in the month to delete
+        if (goal === goalToDelete && `${months[duration - 1]} ${today.getFullYear()}` === monthNameToDelete) {
+            return false;
+        }
+        return true;
+    });
     localStorage.setItem('goals', JSON.stringify(savedGoals));
     renderGoals();
 }
