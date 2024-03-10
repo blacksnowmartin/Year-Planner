@@ -29,6 +29,16 @@ function renderGoals() {
             const goalElement = document.createElement('div');
             goalElement.classList.add('goal');
             goalElement.textContent = goal;
+            
+            // Add delete button
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Delete';
+            deleteButton.classList.add('delete-button');
+            deleteButton.onclick = function() {
+                deleteGoal(goal);
+            };
+            goalElement.appendChild(deleteButton);
+            
             calendarElement.lastChild.appendChild(goalElement);
         }
     });
@@ -44,6 +54,12 @@ function addGoal() {
     }
 
     savedGoals.push({ goal, duration });
+    localStorage.setItem('goals', JSON.stringify(savedGoals));
+    renderGoals();
+}
+
+function deleteGoal(goalToDelete) {
+    savedGoals = savedGoals.filter(({ goal }) => goal !== goalToDelete);
     localStorage.setItem('goals', JSON.stringify(savedGoals));
     renderGoals();
 }
