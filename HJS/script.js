@@ -4,7 +4,7 @@ let savedGoals = JSON.parse(localStorage.getItem('goals')) || [];
 
 function renderGoals() {
     calendarElement.innerHTML = '';
-    const renderedMonths = new Set(); // Use a Set to keep track of rendered months
+    const monthGoalsMap = {}; // Use an object to map months to their goals
     
     savedGoals.forEach(({ goal, duration }) => {
         const today = new Date();
@@ -16,31 +16,32 @@ function renderGoals() {
             const year = currentYear + Math.floor((currentMonth + i) / 12);
             const monthName = `${months[monthIndex]} ${year}`;
             
-            // Check if the month has already been rendered
-            if (!renderedMonths.has(monthName)) {
-                const monthElement = document.createElement('div');
-                monthElement.classList.add('month');
-                monthElement.innerHTML = `<h3>${monthName}</h3>`;
-                calendarElement.appendChild(monthElement);
-                renderedMonths.add(monthName); // Add the month to the Set
+            // Initialize the month's goals list if it doesn't exist
+            if (!monthGoalsMap[monthName]) {
+                monthGoalsMap[monthName] = [];
             }
             
-            // Add goal to the current month
-            const goalElement = document.createElement('div');
-            goalElement.classList.add('goal');
-            goalElement.textContent = goal;
-            
-            // Add delete button
-            const deleteButton = document.createElement('button');
-            deleteButton.textContent = 'Delete';
-            deleteButton.classList.add('delete-button');
-            deleteButton.onclick = function() {
-                deleteGoal(goal, monthName); // Pass monthName to deleteGoal
-            };
-            goalElement.appendChild(deleteButton);
-            
-            calendarElement.lastChild.appendChild(goalElement);
+            // Add the goal to the month's goals list
+            monthGoalsMap[monthName].push(goal);
         }
+    });
+    
+    // Render each month and its goals
+    Object.entries(monthGoalsMap).forEach(([monthName, goals]) => {
+        const monthElement = document.createElement('div');
+        monthElement.classList.add('month');
+        monthElement.innerHTML = `<h3>${monthName}</h3>`;
+        
+        // Create a list of goals for the month
+        const goalsList = document.createElement('ul');
+        goals.forEach(goal => {
+            const goalItem = document.createElement('li');
+            goalItem.textContent = goal;
+            goalsList.appendChild(goalItem);
+        });
+        
+        monthElement.appendChild(goalsList);
+        calendarElement.appendChild(monthElement);
     });
 }
 
@@ -54,15 +55,6 @@ function addGoal() {
     }
 
     savedGoals.push({ goal, duration });
-    localStorage.setItem('goals', JSON.stringify(savedGoals));
-    renderGoals();
-}
-
-function deleteGoal(goalToDelete, monthNameToDelete) {
-    savedGoals = savedGoals.filter(({ goal, duration }) => {
-        // Check if the goal is in the month to delete
-        return !(goal === goalToDelete && `${months[duration - 1]} ${today.getFullYear()}` === monthNameToDelete);
-    });
     localStorage.setItem('goals', JSON.stringify(savedGoals));
     renderGoals();
 }
